@@ -76,8 +76,18 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     ...buildProjectsJsonLd(getFlagshipProjects(), profile),
   ];
 
+  // suppressHydrationWarning below covers ONE thing: the inline script in <body>
+  // sets data-js on <html> before React hydrates, so the client element carries
+  // an attribute the server HTML did not. That is the intended behaviour of a
+  // pre-hydration script, not a bug, and React cannot tell the difference.
+  // The suppression applies to this element's own attributes only — never to its
+  // descendants — so genuine mismatches deeper in the tree are still reported.
   return (
-    <html lang={site.locale} className={`${satoshi.variable} ${jetbrains.variable}`}>
+    <html
+      lang={site.locale}
+      className={`${satoshi.variable} ${jetbrains.variable}`}
+      suppressHydrationWarning
+    >
       <body>
         {/*
           Runs before body content paints, so scroll-reveal's hidden state is
