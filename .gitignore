@@ -1,0 +1,41 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.*
+
+# build output
+.next/
+out/
+build/
+dist/
+
+# environment — never commit
+.env
+.env.*
+!.env.example
+
+# logs and debug
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# editor / OS
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
+
+# typescript
+*.tsbuildinfo
+
+# vercel
+.vercel
+
+# Raw hero sequence: 300 PNGs, ~220 MB. Kept outside the repository entirely.
+# public/hero/ holds the encoded WebP tiers (~4 MB) and IS committed, so a
+# clone can build without the source frames. Re-encode with:
+#   node scripts/encode-hero.mjs --src <dir-of-pngs> --out public/hero
+*.psd
+/raw-hero/

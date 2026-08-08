@@ -1,0 +1,39 @@
+{
+  "sourceFrames": 300,
+  "generated": "2026-08-06T21:51:03.304Z",
+  "tiers": [
+    {
+      "id": "desktop",
+      "note": "full scrub, >=1000px viewports",
+      "width": 480,
+      "height": 853,
+      "frames": 151,
+      "stride": 2,
+      "pattern": "/hero/desktop/{i}.webp",
+      "payloadKB": 2762,
+      "decodedMB": 236
+    },
+    {
+      "id": "tablet",
+      "note": "reduced scrub, 768-999px",
+      "width": 480,
+      "height": 853,
+      "frames": 76,
+      "stride": 4,
+      "pattern": "/hero/tablet/{i}.webp",
+      "payloadKB": 1309,
+      "decodedMB": 119
+    },
+    {
+      "id": "mobile",
+      "note": "poster only — final frame",
+      "width": 480,
+      "height": 853,
+      "frames": 1,
+      "stride": 0,
+      "pattern": "/hero/mobile/{i}.webp",
+      "payloadKB": 23,
+      "decodedMB": 2
+    }
+  ]
+}
