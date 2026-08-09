@@ -17,6 +17,18 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
 
+  /**
+   * Allows the dev server to serve its chunks and HMR socket to a device on the
+   * LAN. Without this, opening the Network URL returns the HTML but Next blocks
+   * every /_next/static request as cross-origin, which looks like a dead page
+   * rather than a security decision.
+   *
+   * Development only — `next build` ignores this, so it widens nothing in
+   * production. It exists because the hero's mobile tier, touch targets, and
+   * reduced-motion variant cannot be verified anywhere except a real phone.
+   */
+  allowedDevOrigins: ['192.168.1.4'],
+
   images: {
     formats: ['image/avif', 'image/webp'],
   },
