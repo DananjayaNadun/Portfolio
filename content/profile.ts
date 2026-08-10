@@ -11,7 +11,7 @@ import { profileSchema, type Profile } from './schema';
  * real content of a similar size drops in without resetting the composition.
  */
 export const profile: Profile = profileSchema.parse({
-  name: 'Your Name',
+  name: 'Dananjaya',
   role: 'Software Engineer',
   positioning: 'I build interfaces that hold up under load.',
   location: 'Remote',
