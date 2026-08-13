@@ -25,24 +25,31 @@ import { parseArgs } from 'node:util';
 /** @typedef {{ id: string; width: number; quality: number; stride: number; note: string }} Tier */
 
 /**
- * Tiers trade frame count against resolution at a fixed memory ceiling, and
- * for a scrubbed sequence smoothness beats sharpness — so width is held at 480
- * and the tiers differ by frame count.
+ * Tiers trade frame count against resolution at a fixed memory ceiling.
  *
- * 480x853 pins 1.64 MB per frame:
- *   desktop  150 frames -> 246 MB   (at the 250 MB budget in CLAUDE.md)
- *   tablet    75 frames -> 123 MB
- *   mobile     1 frame  ->   2 MB
+ * Width is now the SOURCE width, 720. The earlier 480 encode was a mistake for
+ * a hero used as a background: it discarded a third of the detail the footage
+ * actually has, and no layout can recover pixels that were never encoded.
+ * Resampling above 1.0 is what reads as blur, so the encode must at least match
+ * what the screen will ask for.
  *
- * 720px was the original spec and is wrong: 3.69 MB/frame x 150 = 553 MB, more
- * than double the budget. The ceiling is memory, not bandwidth.
+ * 720x1280 pins 3.69 MB per decoded frame, so the 250 MB ceiling in CLAUDE.md
+ * allows 67 frames. Smoothness is what gets spent:
+ *   desktop   61 frames -> 225 MB   (stride 5)
+ *   tablet    38 frames ->  85 MB   (stride 8, narrower)
+ *   mobile     1 frame  ->   4 MB
+ *
+ * 61 frames over a 600vh track is ~78px of scroll per frame against 28px for
+ * the old 151-frame encode. That is the real cost of this change, and it is
+ * paid deliberately: at background scale, softness is visible everywhere at
+ * once, while frame stepping is only visible while actively scrolling.
  *
  * @type {Tier[]}
  */
 const TIERS = [
-  { id: 'desktop', width: 480, quality: 70, stride: 2, note: 'full scrub, >=1000px viewports' },
-  { id: 'tablet', width: 480, quality: 66, stride: 4, note: 'reduced scrub, 768-999px' },
-  { id: 'mobile', width: 480, quality: 78, stride: 0, note: 'poster only — final frame' },
+  { id: 'desktop', width: 720, quality: 72, stride: 4, note: 'full scrub, >=1024px viewports' },
+  { id: 'tablet', width: 560, quality: 68, stride: 7, note: 'reduced scrub, 768-1023px' },
+  { id: 'mobile', width: 720, quality: 80, stride: 0, note: 'poster only — final frame' },
 ];
 
 const BYTES_PER_PIXEL = 4;
@@ -51,11 +58,22 @@ const { values } = parseArgs({
   options: {
     src: { type: 'string' },
     out: { type: 'string', default: 'public/hero' },
+    /**
+     * Inclusive 1-based source range. The captured sequence runs to frame 300,
+     * but the turn completes at 266 — the frames after it drift past eye
+     * contact and undo the gesture the whole hero exists to deliver. Trimming
+     * here rather than in the component means those frames are never encoded,
+     * never shipped, and never decoded into memory.
+     */
+    first: { type: 'string', default: '1' },
+    last: { type: 'string' },
   },
 });
 
 if (!values.src) {
-  console.error('usage: node scripts/encode-hero.mjs --src <dir-of-pngs> [--out public/hero]');
+  console.error(
+    'usage: node scripts/encode-hero.mjs --src <dir-of-pngs> [--out public/hero] [--first 1] [--last 266]'
+  );
   process.exit(1);
 }
 
@@ -109,13 +127,25 @@ async function encodeTier(tier, files, srcDir, outDir) {
 const srcDir = path.resolve(values.src);
 const outDir = path.resolve(values.out);
 
-const files = (await readdir(srcDir)).filter((f) => /\.png$/i.test(f)).sort();
-if (files.length === 0) {
+const allFiles = (await readdir(srcDir)).filter((f) => /\.png$/i.test(f)).sort();
+if (allFiles.length === 0) {
   console.error(`no PNGs found in ${srcDir}`);
   process.exit(1);
 }
 
-console.log(`source: ${files.length} frames in ${srcDir}\n`);
+const firstIndex = Math.max(1, Number(values.first)) - 1;
+const lastIndex = values.last ? Math.min(allFiles.length, Number(values.last)) : allFiles.length;
+const files = allFiles.slice(firstIndex, lastIndex);
+
+if (files.length === 0) {
+  console.error(`range --first ${values.first} --last ${values.last} selected no frames`);
+  process.exit(1);
+}
+
+console.log(
+  `source: ${allFiles.length} frames in ${srcDir}\n` +
+    `using:  ${files.length} (${files[0]} .. ${files[files.length - 1]})\n`
+);
 
 const tiers = [];
 for (const tier of TIERS) {
@@ -130,7 +160,17 @@ for (const tier of TIERS) {
 
 await writeFile(
   path.join(outDir, 'manifest.json'),
-  JSON.stringify({ sourceFrames: files.length, generated: new Date().toISOString(), tiers }, null, 2)
+  JSON.stringify(
+    {
+      sourceFrames: allFiles.length,
+      usedFrames: files.length,
+      range: { first: files[0], last: files[files.length - 1] },
+      generated: new Date().toISOString(),
+      tiers,
+    },
+    null,
+    2
+  )
 );
 
 console.log(`\nmanifest -> ${path.join(outDir, 'manifest.json')}`);

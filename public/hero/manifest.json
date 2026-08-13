@@ -1,39 +1,44 @@
 {
   "sourceFrames": 300,
-  "generated": "2026-08-06T21:51:03.304Z",
+  "usedFrames": 266,
+  "range": {
+    "first": "ezgif-frame-001.png",
+    "last": "ezgif-frame-266.png"
+  },
+  "generated": "2026-08-11T19:06:16.620Z",
   "tiers": [
     {
       "id": "desktop",
-      "note": "full scrub, >=1000px viewports",
-      "width": 480,
-      "height": 853,
-      "frames": 151,
-      "stride": 2,
+      "note": "full scrub, >=1024px viewports",
+      "width": 720,
+      "height": 1280,
+      "frames": 68,
+      "stride": 4,
       "pattern": "/hero/desktop/{i}.webp",
-      "payloadKB": 2762,
-      "decodedMB": 236
+      "payloadKB": 2271,
+      "decodedMB": 239
     },
     {
       "id": "tablet",
-      "note": "reduced scrub, 768-999px",
-      "width": 480,
-      "height": 853,
-      "frames": 76,
-      "stride": 4,
+      "note": "reduced scrub, 768-1023px",
+      "width": 560,
+      "height": 996,
+      "frames": 39,
+      "stride": 7,
       "pattern": "/hero/tablet/{i}.webp",
-      "payloadKB": 1309,
-      "decodedMB": 119
+      "payloadKB": 863,
+      "decodedMB": 83
     },
     {
       "id": "mobile",
       "note": "poster only — final frame",
-      "width": 480,
-      "height": 853,
+      "width": 720,
+      "height": 1280,
       "frames": 1,
       "stride": 0,
       "pattern": "/hero/mobile/{i}.webp",
-      "payloadKB": 23,
-      "decodedMB": 2
+      "payloadKB": 43,
+      "decodedMB": 4
     }
   ]
 }

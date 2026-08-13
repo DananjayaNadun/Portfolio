@@ -33,9 +33,15 @@ Thumbs.db
 # vercel
 .vercel
 
-# Raw hero sequence: 300 PNGs, ~220 MB. Kept outside the repository entirely.
-# public/hero/ holds the encoded WebP tiers (~4 MB) and IS committed, so a
-# clone can build without the source frames. Re-encode with:
-#   node scripts/encode-hero.mjs --src <dir-of-pngs> --out public/hero
+# Raw hero sequence: 300 PNGs at 720x1280, ~210 MB, shipped as a zip. Kept out
+# of the repository entirely — git stores it uncompressed forever, and it is a
+# source asset the build does not need.
+#
+# public/hero/ holds the encoded WebP tiers (~3 MB) and IS committed, so a clone
+# builds without the source frames. To re-encode:
+#   node scripts/encode-hero.mjs --src <dir-of-pngs> --out public/hero --last 266
+#
+# The turn completes at frame 266; 267-300 drift past eye contact and are cut.
 *.psd
+*.zip
 /raw-hero/

@@ -6,10 +6,14 @@ import type { HeroTier } from './tiers';
  *  main thread responsive while the loading screen is still animating. */
 const DECODE_CONCURRENCY = 6;
 
-/** Cover-fit overshoot at progress 0, resolving to 1.0 as the gesture completes. */
-const PUSH_IN = 0.07;
-
-/** Vertical anchor of the cover crop. The face sits above centre. */
+/**
+ * Vertical anchor of the cover crop. The face sits above centre.
+ *
+ * There is deliberately no push-in. Frames are 480x853 — a memory budget, not a
+ * quality setting — so any scale above 1.0 resamples an already-small source
+ * and the whole sequence goes soft. Sharpness is worth more here than a 7%
+ * drift nobody would name if it were missing.
+ */
 const FOCAL_Y = 0.42;
 
 export type SequenceState = {
@@ -126,16 +130,12 @@ export class HeroSequenceController {
     this.lastDrawn = -1;
   }
 
-  private draw(slot: number, progress: number): void {
+  private draw(slot: number): void {
     const frame = this.frames[slot];
     if (!frame || this.bufferWidth === 0) return;
 
     const { width: fw, height: fh } = frameSize(frame);
-    const cover = Math.max(this.bufferWidth / fw, this.bufferHeight / fh);
-
-    // The push-in is applied to the cover factor, not as a CSS transform on the
-    // canvas — transforming the element would resample and visibly soften it.
-    const scale = cover * (1 + PUSH_IN * (1 - progress));
+    const scale = Math.max(this.bufferWidth / fw, this.bufferHeight / fh);
     const dw = fw * scale;
     const dh = fh * scale;
 
@@ -156,7 +156,7 @@ export class HeroSequenceController {
     this.current = p * (this.tier.frames - 1);
 
     const slot = Math.round(this.current);
-    this.draw(slot, p);
+    this.draw(slot);
     this.lastDrawn = slot;
   }
 
@@ -170,7 +170,7 @@ export class HeroSequenceController {
 
     const slot = Math.round(this.current);
     if (slot !== this.lastDrawn) {
-      this.draw(slot, p);
+      this.draw(slot);
       this.lastDrawn = slot;
     }
   }

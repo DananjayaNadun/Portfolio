@@ -1,9 +1,16 @@
+import { profile } from './profile';
 import { siteSchema, type Site } from './schema';
 
-/** PLACEHOLDER — the real domain is needed for canonicals, OG URLs and sitemap. */
+/**
+ * PLACEHOLDER — the real domain is needed for canonicals, OG URLs and sitemap.
+ *
+ * The title is composed from the profile rather than written out again. It had
+ * already drifted once: the name was updated in one file and the browser tab,
+ * OG title and JSON-LD kept announcing the placeholder.
+ */
 export const site: Site = siteSchema.parse({
   url: 'https://example.com',
-  title: 'Your Name — Software Engineer',
+  title: `${profile.name} — ${profile.role}`,
   description:
     'Portfolio of a software engineer building interfaces that hold up under load. Selected work, experience, and contact.',
   locale: 'en',
