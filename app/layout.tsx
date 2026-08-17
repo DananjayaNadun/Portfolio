@@ -6,6 +6,7 @@ import '@/styles/globals.css';
 
 import { Grain } from '@/components/layout/Grain';
 import { SkipLink } from '@/components/layout/SkipLink';
+import { ScrollDepth } from '@/components/motion/ScrollDepth';
 import { Footer } from '@/components/sections/Footer';
 import { LoadingScreen } from '@/components/sections/LoadingScreen';
 import { Navigation } from '@/components/sections/Navigation';
@@ -110,6 +111,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <LoadingScreen />
 
         <Navigation sections={sections} name={profile.name} resumeHref={profile.resumeHref} />
+
+        <ScrollDepth sectionIds={sections.map((section) => section.id)} />
 
         <main id="main" tabIndex={-1}>
           {children}

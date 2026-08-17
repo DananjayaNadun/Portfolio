@@ -48,19 +48,32 @@ export function Section({
         </Container>
       )}
 
+      {/*
+        Every section shares ONE container, so every section shares one left
+        edge. The divider used to be `wide` while content defaulted to
+        `default`, which put each hairline 120px further out than the text it
+        introduced — a visible misalignment on every section of the page.
+
+        `size` now constrains the measure from the right instead of re-centring
+        a narrower box. A prose column that is centred aligns with nothing; a
+        prose column that is capped keeps the page's spine intact while still
+        holding a readable line length.
+      */}
       <div className="py-(--section-py)">
-        <Container size={size}>
-          <p className="t-label flex items-center gap-3 text-(--text-tertiary)">
-            <span data-numeric>{index}</span>
-            <span aria-hidden="true">—</span>
-            <span>{label}</span>
-          </p>
+        <Container size="wide">
+          <div className={cn(size === 'prose' && 'max-w-(--container-prose)')}>
+            <p className="t-label flex items-center gap-3 text-(--text-tertiary)">
+              <span data-numeric>{index}</span>
+              <span aria-hidden="true">—</span>
+              <span>{label}</span>
+            </p>
 
-          <h2 id={headingId} className="t-heading-1 mt-4 text-(--text-primary)">
-            {title}
-          </h2>
+            <h2 id={headingId} className="t-heading-1 mt-4 text-(--text-primary)">
+              {title}
+            </h2>
 
-          <div className="mt-(--section-gap)">{children}</div>
+            <div className="mt-(--section-gap)">{children}</div>
+          </div>
         </Container>
       </div>
     </section>

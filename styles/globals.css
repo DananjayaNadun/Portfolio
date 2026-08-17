@@ -18,7 +18,11 @@
   --color-ink-graphite: #463e41; /* 1.90 — non-text only */
   --color-ink-line-strong: #6c6064; /* 3.28 — UI boundary */
   --color-ink-muted: #887c80; /* 4.92 — AA */
-  --color-ink-secondary: #a29a9d; /* 7.18 — AAA */
+  /* 7.46 on page, 7.15 on raised — AAA on BOTH. The previous #a29a9d cleared
+     7:1 on the page but measured 6.88 on raised surfaces, so body copy inside
+     project cards missed the AAA floor the PRD sets for it. Lifted ~1% per
+     channel: invisible to the eye, and it keeps the R>B>G tint of the ramp. */
+  --color-ink-secondary: #a69da0;
   --color-ink-primary: #efeced; /* 16.79 — AAA */
 
   /* --- Accent ramp: anchored on the sampled key light #E50744 ----------- */
@@ -73,6 +77,11 @@
   --accent-text: var(--color-crimson-200);
   --focus-ring: var(--color-crimson-400);
 
+  /* Shared by the scrollbar thumb and the nav's orbiting rim, so the two can
+     never drift apart. Changing these changes both, which is the point. */
+  --scrollbar-thumb: var(--color-ink-line-strong);
+  --scrollbar-thumb-hot: var(--color-crimson-600);
+
   /* --- Duration --------------------------------------------------------- */
   --dur-instant: 80ms;
   --dur-fast: 160ms;
@@ -115,7 +124,10 @@
   /* --- Layout ----------------------------------------------------------- */
   --container-prose: 44rem;
   --container-default: 75rem;
-  --container-wide: 90rem;
+  /* 96rem, up from 90rem. Now that every section shares this one measure, it
+     sets the page's whole rhythm — at 90rem a 1920px display gave the content
+     68% of the width and the composition read as inset rather than composed. */
+  --container-wide: 96rem;
   --container-full: 100rem;
   --gutter: clamp(20px, 5vw, 64px);
   --section-py: clamp(5rem, 3rem + 8vw, 10rem);
@@ -153,6 +165,45 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: clip;
+  }
+
+  /*
+    The scrollbar is part of the composition, not chrome bolted to the side.
+    A default light-grey bar down the edge of a near-black page is the single
+    loudest unintentional element on the screen.
+
+    Both syntaxes are here on purpose: the standard properties are what Firefox
+    and modern Safari honour, and the ::-webkit- pseudo-elements are what
+    Chromium still needs for a thumb this specific. Neither alone covers the
+    field. Width is held at 10px — thinner reads as broken to anyone who
+    actually drags it, and this remains a real control.
+  */
+  html {
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) transparent;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+    border: 3px solid var(--surface-page);
+    border-radius: 999px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollbar-thumb-hot);
+  }
+
+  ::-webkit-scrollbar-corner {
+    background: transparent;
   }
 
   /* Single focus system. `outline: none` without a replacement fails review. */
@@ -281,8 +332,76 @@
     transition: none;
   }
 
-  /* A line of light that falls, pauses, and falls away. The one looping
-     animation on the site; it stops the moment the reader starts scrolling. */
+  /*
+    A light orbiting the navigation pill, in the scrollbar's own colours.
+
+    Built as a rotating conic gradient clipped by the pill's rounded rim: the
+    element is square and oversized so the sweep stays even at the corners, and
+    only `rotate` animates — the gradient itself never re-rasterises, which is
+    what keeps this on the compositor instead of the paint thread.
+
+    It is the second permanently looping animation on the site, after the hero
+    cue. Unlike that one it never stops, so it is kept to a single small layer
+    and a slow period; a fast orbit here would read as a loading spinner and
+    would tell the reader something is happening when nothing is.
+  */
+  /*
+    Confines the orbit to the 1.5px rim and nothing else.
+
+    The pill's surface is only 72% opaque — that translucency is the glass — so
+    without this the sweep was plainly visible THROUGH the nav, washing across
+    the links. Making the surface opaque would have fixed it by deleting the
+    glass, which is the wrong trade.
+
+    Two masks composited with `exclude` cut the content box out of the padding
+    box, leaving exactly the ring. It carries the resting colour too, so nothing
+    paints behind the nav and the glass keeps blurring the page rather than a
+    layer of our own.
+  */
+  .nav-orbit-ring {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    padding: 1.5px;
+    border-radius: 999px;
+    background: var(--glass-border);
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask-composite: exclude;
+  }
+
+  .nav-orbit {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 210%;
+    aspect-ratio: 1;
+    translate: -50% -50%;
+    background: conic-gradient(
+      from 0deg,
+      transparent 0deg,
+      transparent 232deg,
+      var(--scrollbar-thumb) 300deg,
+      var(--scrollbar-thumb-hot) 336deg,
+      var(--scrollbar-thumb) 348deg,
+      transparent 360deg
+    );
+    animation: nav-orbit 7s linear infinite;
+  }
+
+  @keyframes nav-orbit {
+    to {
+      rotate: 360deg;
+    }
+  }
+
+  /* A line of light that falls, pauses, and falls away. It stops the moment the
+     reader starts scrolling. */
   .hero-cue-line {
     background: linear-gradient(180deg, var(--accent), transparent);
     animation: hero-cue 2.4s var(--ease-standard) infinite;

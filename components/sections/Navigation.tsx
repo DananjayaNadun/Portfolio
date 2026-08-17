@@ -1,7 +1,6 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ScrollProgressBar } from '@/components/motion/ScrollProgressBar';
 import { useActiveSection } from '@/hooks/useActiveSection';
 import { useFrame } from '@/hooks/useFrame';
 import { cn } from '@/lib/utils/cn';
@@ -65,21 +64,34 @@ export function Navigation({ sections, name, resumeHref }: NavigationProps) {
     return () => dialog.removeEventListener('close', handleClose);
   }, []);
 
+  // The top progress hairline that used to render here is gone. Two readouts
+  // for one scroll is duplication, and ScrollDepth carries strictly more
+  // information than a bar with no scale on it.
   return (
     <header ref={headerRef} className="group/nav" data-compressed="false">
-      <ScrollProgressBar />
-
       {/* ---------------- Desktop: floating glass pill ---------------- */}
-      <nav
-        aria-label="Primary"
+      {/*
+        The rim is a masked ring, not a border and not a background on this
+        wrapper — a border cannot carry a rotating gradient without repainting,
+        and a background here would sit behind the pill's translucent surface
+        where the sweep would show through the links.
+      */}
+      <div
         className={cn(
-          'fixed top-6 left-1/2 z-[80] hidden -translate-x-1/2 lg:flex',
-          'items-center gap-1 rounded-full p-1.5',
-          'border border-(--glass-border) bg-(--glass-bg) shadow-(--e3) backdrop-blur-[24px]',
+          'fixed top-6 left-1/2 z-[80] hidden -translate-x-1/2 lg:block',
+          'rounded-full p-[1.5px] shadow-(--e3)',
           'transition-opacity duration-(--dur-base) ease-(--ease-standard)',
           'group-data-[compressed=true]/nav:opacity-90'
         )}
       >
+        <span className="nav-orbit-ring" aria-hidden="true" data-decorative>
+          <span className="nav-orbit" />
+        </span>
+
+        <nav
+          aria-label="Primary"
+          className="relative flex items-center gap-1 rounded-full bg-(--glass-bg) p-1.5 backdrop-blur-[24px]"
+        >
         <ul className="flex items-center gap-1">
           {sections.map((section) => {
             const isActive = activeId === section.id;
@@ -89,7 +101,10 @@ export function Navigation({ sections, name, resumeHref }: NavigationProps) {
                   href={`#${section.id}`}
                   aria-current={isActive ? 'true' : undefined}
                   className={cn(
-                    'relative flex h-9 items-center rounded-full px-4 text-[0.9375rem]',
+                    // h-11, not h-9. The pill is lg:-only and 36px clears WCAG
+                    // 2.2's 24px floor, but 1024px+ touch devices exist and the
+                    // house rule is 44 flat. Costs the pill 8px of height.
+                    'relative flex h-11 items-center rounded-full px-4 text-[0.9375rem]',
                     'transition-colors duration-(--dur-fast) ease-(--ease-standard)',
                     isActive
                       ? 'bg-(--hover-fill) text-(--text-primary)'
@@ -109,7 +124,7 @@ export function Navigation({ sections, name, resumeHref }: NavigationProps) {
           href={resumeHref}
           download
           className={cn(
-            'flex h-9 items-center gap-2 rounded-full px-4 text-[0.9375rem] font-medium',
+            'flex h-11 items-center gap-2 rounded-full px-4 text-[0.9375rem] font-medium',
             'text-(--text-primary) transition-colors duration-(--dur-fast)',
             'hover:bg-(--hover-fill)'
           )}
@@ -117,7 +132,8 @@ export function Navigation({ sections, name, resumeHref }: NavigationProps) {
           Resume
           <DownloadIcon />
         </a>
-      </nav>
+        </nav>
+      </div>
 
       {/* ---------------- Mobile: bar + dialog menu ---------------- */}
       <div
@@ -130,7 +146,10 @@ export function Navigation({ sections, name, resumeHref }: NavigationProps) {
           'group-data-[compressed=true]/nav:backdrop-blur-[24px]'
         )}
       >
-        <a href="#hero" className="t-label text-(--text-primary)">
+        <a
+          href="#hero"
+          className="t-label -ml-2 inline-flex h-11 items-center px-2 text-(--text-primary)"
+        >
           {name}
         </a>
 

@@ -37,7 +37,10 @@ export function Contact() {
       />
 
       <div className="relative py-[clamp(6rem,4rem+10vw,14rem)]">
-        <Container>
+        {/* `wide`, matching every other section. Contact sat 120px inboard of
+            the rest of the page, which read as a layout mistake rather than as
+            emphasis. */}
+        <Container size="wide">
           <Reveal>
             <p className="t-label flex items-center gap-3 text-(--text-tertiary)">
               <span data-numeric>06</span>
@@ -64,9 +67,13 @@ export function Contact() {
             <div className="mt-10">
               {/* The address itself is the headline action, not a label on a
                   button. It is selectable, copyable, and readable at a glance. */}
+              {/* py-2.5 is not spacing — it is the tap target. This is the
+                  highest-intent control on the page and the line box alone was
+                  28px tall, under both the 44px house rule and the WCAG 2.2
+                  minimum. The negative margin keeps the optical alignment. */}
               <a
                 href={`mailto:${profile.email}`}
-                className="t-heading-2 inline-block break-all text-(--text-primary) underline decoration-(--border-interactive) decoration-1 underline-offset-[6px] transition-colors duration-(--dur-fast) ease-(--ease-standard) hover:decoration-(--accent)"
+                className="t-heading-2 -my-2.5 inline-block break-all py-2.5 text-(--text-primary) underline decoration-(--border-interactive) decoration-1 underline-offset-[6px] transition-colors duration-(--dur-fast) ease-(--ease-standard) hover:decoration-(--accent)"
               >
                 {profile.email}
               </a>
@@ -97,13 +104,13 @@ export function Contact() {
 
           {visibleSocials.length > 0 && (
             <Reveal delayMs={300}>
-              <ul className="mt-12 flex flex-wrap gap-x-8 gap-y-3">
+              <ul className="mt-10 flex flex-wrap gap-x-6">
                 {visibleSocials.map((social) => (
                   <li key={social.href}>
                     <a
                       href={social.href}
                       rel="me noopener"
-                      className="t-body-sm text-(--text-secondary) underline-offset-4 transition-colors duration-(--dur-fast) hover:text-(--text-primary) hover:underline"
+                      className="t-body-sm -mx-2 inline-flex min-h-11 items-center px-2 text-(--text-secondary) underline-offset-4 transition-colors duration-(--dur-fast) hover:text-(--text-primary) hover:underline"
                     >
                       {social.label}
                     </a>

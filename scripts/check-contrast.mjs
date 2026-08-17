@@ -55,10 +55,27 @@ const tokens = readTokens(CSS);
  * UI carry the lower WCAG minimums.
  */
 const PAIRINGS = [
+  // Primary body copy — AAA, on every surface it is used on.
   ['color-ink-primary', 'color-ink-base', 7, 'body text on page'],
   ['color-ink-primary', 'color-ink-raised', 7, 'body text on raised surface'],
-  ['color-ink-secondary', 'color-ink-base', 4.5, 'secondary text on page'],
-  ['color-ink-muted', 'color-ink-base', 4.5, 'tertiary/label text on page'],
+
+  /*
+   * Secondary copy on BOTH surfaces.
+   *
+   * The raised row is the one that matters and the one this file used to be
+   * missing. Project card descriptions render on --surface-raised, which is
+   * lighter than the page, so the ratio there is always the lower of the two —
+   * and it was 6.88 while this gate reported a clean pass against the page
+   * alone. A gate that only measures the easy surface manufactures confidence.
+   */
+  ['color-ink-secondary', 'color-ink-base', 7, 'secondary text on page'],
+  ['color-ink-secondary', 'color-ink-raised', 7, 'secondary text on raised surface'],
+
+  // Labels and captions. AA, not AAA: they are short, and the design system
+  // classes them as UI text rather than body copy.
+  ['color-ink-muted', 'color-ink-base', 4.5, 'label/caption text on page'],
+  ['color-ink-muted', 'color-ink-raised', 4.5, 'label/caption on raised surface'],
+
   ['color-crimson-200', 'color-ink-base', 4.5, 'accent text on page'],
   ['color-crimson-300', 'color-ink-base', 4.5, 'accent text, lighter step'],
   ['color-jade-300', 'color-ink-base', 4.5, 'availability text'],

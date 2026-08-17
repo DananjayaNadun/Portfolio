@@ -115,7 +115,12 @@ Non-negotiable. Lighthouse 100 is the floor, not the goal.
 - Icon-only controls require `aria-label` — enforced as a required prop on `IconButton`.
 - Form fields get persistent visible labels. **Placeholder-as-label is banned** (WCAG 3.3.2).
 - Errors carry an icon **and** text, never colour alone, wired with `aria-describedby` + `aria-invalid`.
-- Touch targets ≥ 44 × 44 px.
+- Touch targets ≥ 44 × 44 px. Give a link padding, not the list a gap — row
+  spacing is what leaves text links 19px tall. The one exception is WCAG 2.2's:
+  a link **inside a sentence**, whose height is constrained by the line-height
+  of the text around it. Forcing 44px there breaks the paragraph, and such a
+  link is always a repeat of a full-size target elsewhere. Never use it as an
+  excuse for a standalone control.
 - Body text ≥ 7:1 (AAA). Never use `crimson-500` for small text — it measures 4.15:1. Use `crimson-200`/`300`.
 - Decorative motion is `aria-hidden`. The hero canvas has a text alternative.
 - **Reduced motion is a design variant, not a kill switch.** It must look finished.
