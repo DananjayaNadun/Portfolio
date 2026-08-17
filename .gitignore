@@ -45,3 +45,4 @@ Thumbs.db
 *.psd
 *.zip
 /raw-hero/
+tsconfig.tsbuildinfo
